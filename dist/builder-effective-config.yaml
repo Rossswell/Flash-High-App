@@ -1,0 +1,17 @@
+directories:
+  output: dist
+  buildResources: build
+appId: com.flashhigh.admin
+productName: Flash High Admin
+win:
+  target: nsis
+  icon: src/assets/icon.ico
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+files:
+  - filter:
+      - electron/**/*
+      - src/**/*
+      - node_modules/**/*
+electronVersion: 28.3.3
