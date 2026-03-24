@@ -1,0 +1,40 @@
+{
+  "name": "flash-high-admin",
+  "version": "1.0.0",
+  "description": "Flash High — Panel de control de asistencia",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev":   "electron . --dev",
+    "build": "cross-env CSC_IDENTITY_AUTO_DISCOVERY=false WIN_CSC_LINK='' electron-builder --win portable --x64"
+  },
+  "build": {
+    "appId": "com.flashhigh.admin",
+    "productName": "Flash High Admin",
+    "win": {
+      "target": [{ "target": "portable", "arch": ["x64"] }],
+      "signingHashAlgorithms": null,
+      "sign": null,
+      "certificateFile": null,
+      "certificatePassword": null
+    },
+    "portable": {
+      "splashImage": null
+    },
+    "files": [
+      "electron/**/*",
+      "src/**/*",
+      "node_modules/**/*"
+    ]
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "electron": "^28.0.0",
+    "electron-builder": "^24.0.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "googleapis": "^143.0.0",
+    "google-auth-library": "^9.0.0"
+  }
+}
