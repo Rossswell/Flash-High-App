@@ -5,14 +5,21 @@
   "main": "electron/main.js",
   "scripts": {
     "start": "electron .",
-    "dev":   "electron . --dev",
+    "dev": "electron . --dev",
     "build": "cross-env CSC_IDENTITY_AUTO_DISCOVERY=false WIN_CSC_LINK='' electron-builder --win portable --x64"
   },
   "build": {
     "appId": "com.flashhigh.admin",
     "productName": "Flash High Admin",
     "win": {
-      "target": [{ "target": "portable", "arch": ["x64"] }],
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
       "signingHashAlgorithms": null,
       "sign": null,
       "certificateFile": null,
@@ -33,8 +40,7 @@
     "electron-builder": "^24.0.0"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.39.0",
-    "googleapis": "^143.0.0",
-    "google-auth-library": "^9.0.0"
+    "google-auth-library": "^9.0.0",
+    "googleapis": "^143.0.0"
   }
 }

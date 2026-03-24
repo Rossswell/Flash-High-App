@@ -59,7 +59,7 @@ async function init() {
 
   // Schedule picker rows will be built on openSchPicker()
 
-  // En modo solo Google Sheets no se usa Supabase.
+  // En modo solo Google Sheets no se usa backend adicional.
   // Si necesitas estado local, se renderiza directamente desde state.employees.
   renderEmployees()
 
@@ -91,7 +91,7 @@ function setConnected(ok) {
   txt.textContent = ok ? 'Conectado' : 'Sin conexión'
 }
 
-// loadAll ya no usa Supabase en esta versión (solo Google Sheets)
+// loadAll solo usa estado local + Google Sheets en esta versión
 async function loadAll() {
   renderEmployees()
 }
@@ -390,12 +390,6 @@ async function addEmployee() {
       nombre, apellido, email, cedula, rol, telefono, inicio, cumpleanos: cumple, cumple
     })
     renderEmployees()
-    try {
-      await appendEmployeeToSheet({ nombre, apellido, cedula, telefono, email, rol, inicio, cumple })
-    } catch(sheetErr) {
-      console.warn('Sheet sync warning:', sheetErr.message)
-      toast('Guardado en Supabase, pero falló sync con Sheets: ' + sheetErr.message, 'warning')
-    }
 
     // 3. Clear form
     ;['e-nombre','e-apellido','e-cedula','e-telefono','e-email','e-rol'].forEach(id => {
@@ -423,14 +417,26 @@ async function appendEmployeeToSheet(emp) {
   // Columnas esperadas en Google Sheet (A-G):
   // A=Nombre | B=Cedula | C=Telefono | D=Correo | E=Area | F=Inicio en la empresa | G=Cumpleaños
   const fullName = `${emp.nombre} ${emp.apellido}`.trim()
+  const normalizeDate = (value) => {
+    if (!value) return ''
+    // Mantener formato ISO yyyy-mm-dd para respetar el formato de la hoja.
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value
+    const d = new Date(value)
+    if (Number.isNaN(d.getTime())) return value
+    const y = d.getFullYear()
+    const m = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${y}-${m}-${day}`
+  }
+
   const row = [
-    fullName,            // A - Nombre completo
-    emp.cedula   || '',  // B - Cédula
-    emp.telefono || '',  // C - Teléfono
-    emp.email    || '',  // D - Correo
-    emp.rol      || '',  // E - Área
-    emp.inicio   || '',  // F - Inicio en la empresa
-    emp.cumple   || '',  // G - Cumpleaños
+    fullName,                    // A - Nombre completo
+    emp.cedula   || '',          // B - Cédula
+    emp.telefono || '',          // C - Teléfono
+    emp.email    || '',          // D - Correo
+    emp.rol      || '',          // E - Área
+    normalizeDate(emp.inicio),   // F - Inicio en la empresa
+    normalizeDate(emp.cumple),   // G - Cumpleaños
   ]
 
   const token = await getGoogleToken()
@@ -683,7 +689,7 @@ async function saveSchedule() {
   const active = DAYS_LIST.filter(d => state.schDays[d].active)
   if (!active.length) { toast('Configura el horario con el botón de días','warning'); return }
 
-  // Use the first active day for the shared entrada/salida (Supabase schema)
+  // Use the first active day for the shared entrada/salida
   // and store per-day data in a json field via mensaje or as-is
   const first   = state.schDays[active[0]]
   const entrada = `${pad2(first.eh)}:${pad2(first.em)}`
@@ -1037,7 +1043,6 @@ async function syncSheets() {
               String(l.late_min||''), l.mensaje||'']
     })
 
-    // We'll use Supabase Edge Functions or just show a success toast
     // since Google Sheets API needs a server-side call.
     // For now: export to clipboard as a CSV summary.
     const total = aRows.length + bRows.length
